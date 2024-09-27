@@ -2,13 +2,19 @@
 
 ## Setup project
 
-I tested the code only on Ubuntu 22.04.
+I use MacOS 12 to develop the project
 
 ### Start Python virtual environment
 
 ```sh
 python3 -m venv env
 source env/bin/activate
+```
+
+### Stop Python virtual environment
+
+```sh
+deactivate 
 ```
 
 ### Install dependencies

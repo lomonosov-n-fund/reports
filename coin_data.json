@@ -1,0 +1,52 @@
+{
+    "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599": {
+        "Coin Name": "WBTC",
+        "Asset Name": "BTC",
+        "Asset Class": "Native Coins"
+    },
+    "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": {
+        "Coin Name": "WETH",
+        "Asset Name": "ETH",
+        "Asset Class": "Native Coins"
+    },
+    "0xae7ab96520de3a18e5e111b5eaab095312d7fe84": {
+        "Coin Name": "stETH",
+        "Asset Name": "ETH",
+        "Asset Class": "Native Coins"
+    },
+    "0xd31a59c85ae9d8edefec411d448f90841571b89c": {
+        "Coin Name": "WSOL",
+        "Asset Name": "SOL",
+        "Asset Class": "Native Coins"
+    },
+    "0xdac17f958d2ee523a2206206994597c13d831ec7": {
+        "Coin Name": "USDT",
+        "Asset Name": "USDT",
+        "Asset Class": "Stable Coins"
+    },
+    "0x23878914efe38d27c4d67ab83ed1b93a74d4086a": {
+        "Coin Name": "aEthUSDT",
+        "Asset Name": "USDT",
+        "Asset Class": "Stable Coins"
+    },
+    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+        "Coin Name": "USDC",
+        "Asset Name": "USDC",
+        "Asset Class": "Stable Coins"
+    },
+    "0x6b175474e89094c44da98b954eedeac495271d0f": {
+        "Coin Name": "DAI",
+        "Asset Name": "DAI",
+        "Asset Class": "Stable Coins"
+    },
+    "0x018008bfb33d285247a21d44e50697654f754e63": {
+        "Coin Name": "aEthDAI",
+        "Asset Name": "DAI",
+        "Asset Class": "Stable Coins"
+    },
+    "0xec67005c4e498ec7f55e092bd1d35cbc47c91892": {
+        "Coin Name": "MLN",
+        "Asset Name": "MLN",
+        "Asset Class": "Internal"
+    }
+}

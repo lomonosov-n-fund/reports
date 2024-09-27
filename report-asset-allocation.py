@@ -137,7 +137,7 @@ def report_inclass_allocations(index_csv, assets, class_name, total):
     classname = replace_blanks(class_name)
     pandas_to_latex(inclass_assets, f'report/inclass-{classname}.tex',caption=f'Распределение активов в классе {class_name}', label=f'inclass-allocation-{classname}')
 
-index_date='2024-07-13'
+index_date='2024-09-08'
 print(f'using index data for {index_date}')
 report_inclass_allocations(f'index/{index_date}/Constituents - CoinDesk Large Cap Select Index.csv', assets, 'Native Coins', assets_by_class["value"]["Native Coins"])
 report_inclass_allocations(f'index/{index_date}/Constituents - CoinDesk Stablecoin Index.csv', assets, 'Stable Coins', assets_by_class["value"]["Stable Coins"])
