@@ -43,10 +43,25 @@ You can get free API keys from corresponding API providers
 ## Query Enzyme API to download transactions as JSON
 
 ```sh
-python query-enzyme.py > vault-activity.json
+python query-vault-activity.py > vault-activity.json
 ```
 
 ## Run Python scripts to generate LaTeX table for the report
+
+### Report depositors
+
+```sh
+python ./report-depositors.py
+```
+
+### Report performance
+
+- Net share value over time
+- Gross asset value over time
+
+```sh
+python ./report-performance.py
+```
 
 ### Transaction expenses
 

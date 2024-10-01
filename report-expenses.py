@@ -75,19 +75,11 @@ trade = TradesData()
 # get filename from command line argument, if not provided, use default
 filename = sys.argv[1] if len(sys.argv) > 1 else 'vault-activity.json'
 
-
 with open(filename, 'r') as file:
     data = json.load(file)
 
 def get_part_before_slash(s):
     return s.split('/')[0]
-
-
-
-# Create a table object
-# table = PrettyTable()
-# table.field_names = ["Date", "Fee (USD)"]
-
 
 def trade_fee(transaction_hash):
     t = trade.qet(transaction_hash)
@@ -98,42 +90,81 @@ def trade_fee(transaction_hash):
     print(f'Date  {block_date} Fee (USD): {fee_usd}' )
     return block_date, fee_usd
     
- 
+def mgmt_fee(transaction_hash):
+    t = trade.qet(transaction_hash)
+    fee_eth = float(t["transaction_fee"])
+    block_date = normalize_date(t["block_timestamp"])
+    eth_price = price_usd.quote(block_date)
+    fee_usd = fee_eth * eth_price
+    print(f'Date  {block_date} Fee (USD): {fee_usd}' )
+    return block_date, fee_usd
+
+
 dict = {
     "Date": [],
     "Fee": []
 }   
 
+fee_mgmt = {
+    "Date": [],
+    "Fee": []
+}
+
+
 for activity in data['vaultActivities']:
     if 'trade' in activity:
         transaction_hash = get_part_before_slash(activity['trade']['id'])
-        print(f'Trade {transaction_hash}')
+        # print(f'Trade {transaction_hash}')
         d, f = trade_fee(transaction_hash)
-        print(d, f)
+        # print(d, f)
         dict["Date"].append(d) 
         dict["Fee"].append(f)
+    elif "feeSharesReceivedEvent" in activity:
+        # print(f'FeeShares {activity["feeSharesReceivedEvent"]}')
+        transaction_hash = get_part_before_slash(activity['feeSharesReceivedEvent']['id'])
+        d, f = mgmt_fee(transaction_hash)
+        shares = float(activity["feeSharesReceivedEvent"]["shares"])
+        print(f'Date {d} Fee (USD): {f} Shares: {shares}')
+        fee_mgmt["Date"].append(d)
+        fee_mgmt["Fee"].append(shares)
+    else:
+        # do nothing
+        pass
+        
+    
+def AggregatByMonth(df):
+    # Convert the Date column to datetime format
+    df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
+    # Extract year and month from the Date column
+    df['YearMonth'] = df['Date'].dt.to_period('M')
+    # Group by the new YearMonth column and sum the Fee column
+    monthly_fees = df.groupby('YearMonth')['Fee'].sum().reset_index()
+    # Round the Fee column to 2 decimal places
+    monthly_fees['Fee'] = monthly_fees['Fee'].round(2)
+    # Display the aggregated DataFrame
+    print(monthly_fees)
+    return monthly_fees
 
-# print(table)
+
+
 df = pd.DataFrame(dict)
-print(df)
+monthly_fees = AggregatByMonth(df)
 
-# Convert the Date column to datetime format
-df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y')
-
-# Extract year and month from the Date column
-df['YearMonth'] = df['Date'].dt.to_period('M')
-
-# Group by the new YearMonth column and sum the Fee column
-monthly_fees = df.groupby('YearMonth')['Fee'].sum().reset_index()
-# Round the Fee column to 2 decimal places
-monthly_fees['Fee'] = monthly_fees['Fee'].round(2)
-# Display the aggregated DataFrame
-print(monthly_fees)    
 
 # Export to LaTeX
 
 pandas_to_latex(
     monthly_fees, 
-    './report/monthly-fees.tex', 
-    caption = 'Транзакционные расходы', 
-    label = 'monthly-fees')
+    './report/monthly-tx-expense.tex', 
+    caption = 'Транзакционные расходы (USD)', 
+    label = 'monthly-tx-expense')
+
+df_mgmt = pd.DataFrame(fee_mgmt)
+print(df_mgmt)
+monthly_fees_mgmt = AggregatByMonth(df_mgmt)
+
+pandas_to_latex(
+    monthly_fees_mgmt, 
+    './report/monthly-mgmt-fee.tex', 
+    caption = 'Комиссия за управление (акции фонда)', 
+    label = 'monthly-mgmt-fee')

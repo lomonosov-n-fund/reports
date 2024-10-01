@@ -5,6 +5,7 @@ import requests
 import json
 from dotenv import load_dotenv
 import os
+import sys
 import pandas as pd
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
@@ -116,6 +117,9 @@ def replace_blanks(s):
     return s.replace(' ', '-')
 
 def report_inclass_allocations(index_csv, assets, class_name, total):
+    if not os.path.exists(index_csv):
+        print(f"Error: The file '{index_csv}' does not exist.")
+        sys.exit(1)
     print(f'\nInclass allocations for {class_name}:')
     # keep rows with Asset Class = class_name
     coins = assets[assets["Asset Class"] == class_name]
@@ -135,9 +139,10 @@ def report_inclass_allocations(index_csv, assets, class_name, total):
     inclass_assets.sort_values(by='Percentage', ascending=False, inplace=True)
     print(inclass_assets.to_string(index=False))
     classname = replace_blanks(class_name)
+    print(f'\nExporting to LaTEX')
     pandas_to_latex(inclass_assets, f'report/inclass-{classname}.tex',caption=f'Распределение активов в классе {class_name}', label=f'inclass-allocation-{classname}')
 
-index_date='2024-09-08'
-print(f'using index data for {index_date}')
+index_date='2024-09-29'
+print(f'\nusing index data for {index_date}')
 report_inclass_allocations(f'index/{index_date}/Constituents - CoinDesk Large Cap Select Index.csv', assets, 'Native Coins', assets_by_class["value"]["Native Coins"])
 report_inclass_allocations(f'index/{index_date}/Constituents - CoinDesk Stablecoin Index.csv', assets, 'Stable Coins', assets_by_class["value"]["Stable Coins"])

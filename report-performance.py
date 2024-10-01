@@ -26,14 +26,18 @@ headers = {
 # Data to be sent in JSON format
 address = os.getenv('ENZYME_VAULT_ADDRESS')
 
-
+# use ISO 8601 format for dates
+start_date = "2024-05-01T00:00:00Z"
+print(f"start date {start_date}")
+end_date = "2024-09-26T00:00:00Z"
+print(f"end date {end_date}")
 data = {
     "deployment": "DEPLOYMENT_UNSPECIFIED", 
     "address": address,  
     "currency": "CURRENCY_UNSPECIFIED",  # Currency in which to receive the data
     "range": {
-        "from": "2024-05-01T00:00:00Z",  # Start date in ISO 8601 format
-        "to": "2024-07-11T00:00:00Z"  # End date in ISO 8601 format
+        "from": start_date,  # Start date in ISO 8601 format
+        "to": end_date  # End date in ISO 8601 format
     },
     "resolution": "RESOLUTION_ONE_DAY"  #
 }
@@ -64,6 +68,7 @@ import matplotlib.pyplot as plt
 
 # Directory where the plot will be saved
 output_dir = './report'
+print(f"Output directory {output_dir}")
 
 # Create the directory if it doesn't exist
 if not os.path.exists(output_dir):
