@@ -40,10 +40,13 @@ ENZYME_VAULT_ADDRESS=...
 
 You can get free API keys from corresponding API providers
 
+Specifically, in order to use the Enzyme API, you will need an API key. API keys can be generated within the Enzyme App, https://app.enzyme.finance/account/api-tokens
+
+
 ## Query Enzyme API to download transactions as JSON
 
 ```sh
-python query-vault-activity.py > vault-activity.json
+python query-vault-activity.py vault-activity.json
 ```
 
 ## Run Python scripts to generate LaTeX table for the report
@@ -58,6 +61,8 @@ python ./report-depositors.py
 
 - Net share value over time
 - Gross asset value over time
+
+edit `start_date` and `end_date` and:
 
 ```sh
 python ./report-performance.py

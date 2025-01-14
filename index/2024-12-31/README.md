@@ -1,0 +1,1 @@
+CoinDesk doesn't update its Large Cap index since August 2024. I edited the index using the data from CoinGecko

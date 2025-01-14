@@ -1,0 +1,6 @@
+﻿"Symbol","Name","DACS Sector","DACS Industry Group","DACS Industry","Weight"
+"avax","Avalanche","Smart Contract Platform","Layer 1","Layer 1","0.0"
+"btc","Bitcoin","Currency","Transparent","Transparent DeFi Currency","79.0"
+"eth","Ethereum","Smart Contract Platform","Layer 1","Layer 1","17.0"
+"sol","Solana","Smart Contract Platform","Layer 1","Layer 1","4.0"
+"xrp","XRP","Currency","BaaS","Payments","0.0"

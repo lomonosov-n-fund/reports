@@ -4,6 +4,7 @@ prices.db
 trades.db
 vault-activity.json
 report/
+test
 .DS_Store
 
 # Byte-compiled / optimized / DLL files

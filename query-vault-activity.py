@@ -1,12 +1,16 @@
 # Enzyme API documentation: https://enzymefinance.github.io/sdk/api/overview
 
+import sys
 import requests
 import json
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+# use first argument as filename, if not provided, use default
+filename = sys.argv[1] if len(sys.argv) > 1 else 'vault-activity.json'
+print(f"Filename: {filename}")
 
+load_dotenv()
 
 # URL for the request
 url = "https://api.enzyme.finance/enzyme.enzyme.v1.EnzymeService/GetVaultActivities"
@@ -14,21 +18,34 @@ url = "https://api.enzyme.finance/enzyme.enzyme.v1.EnzymeService/GetVaultActivit
 # Headers to be sent with the request
 ENZYME_API_KEY=os.getenv('ENZYME_API_KEY')
 headers = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {ENZYME_API_KEY}",
-    "Connect-Protocol-Version": "1"
+    "content-type": "application/json",
+    "authorization": f"Bearer {ENZYME_API_KEY}",
+    "connect-protocol-version": "1"
 }
 
 # Data to be sent in JSON format
 address = os.getenv('ENZYME_VAULT_ADDRESS')
+start_date = "2024-01-01T00:00:00Z"
+print(f"start date {start_date}")
+end_date = "2024-12-01T00:00:00Z"
+print(f"end date {end_date}")
+
 data = {
-  "deployment": "DEPLOYMENT_UNSPECIFIED",
+  "deployment": "ethereum",
   "address": address,
-  "currency": "CURRENCY_UNSPECIFIED"
+  "currency": "usd",
+  "range": {"from": start_date, "to": end_date}
 }
 
-# Make the POST request
+print("Making the request")
 response = requests.post(url, headers=headers, data=json.dumps(data))
+print(f"Response status code: {response.status_code}")
 
-# pretty print the response
-print(json.dumps(response.json(), indent=2))
+# check if the request was successful
+if response.status_code != 200:
+    print(f"Request failed with status code {response.status_code}")
+    exit()
+
+# pretty print the response into a file
+with open(filename, 'w') as file:
+    file.write(json.dumps(response.json(), indent=2))

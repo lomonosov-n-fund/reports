@@ -1,5 +1,4 @@
 # Report on Performance 
-
 # Enzyme API documentation: https://enzymefinance.github.io/sdk/api/overview
 
 import requests
@@ -7,7 +6,6 @@ import json
 from dotenv import load_dotenv
 import os
 import pandas as pd
-
 
 pd.set_option('display.float_format', '{:.2f}'.format)
 load_dotenv()
@@ -29,12 +27,20 @@ address = os.getenv('ENZYME_VAULT_ADDRESS')
 # use ISO 8601 format for dates
 start_date = "2024-05-01T00:00:00Z"
 print(f"start date {start_date}")
-end_date = "2024-09-26T00:00:00Z"
+# end_date = "today"
+end_date = "2024-12-31T00:00:00Z"
+
+if end_date == "today":
+    # get the current date
+    from datetime import datetime
+    end_date = datetime.now().isoformat()
+
 print(f"end date {end_date}")
+
 data = {
-    "deployment": "DEPLOYMENT_UNSPECIFIED", 
+    "deployment": "ethereum", 
     "address": address,  
-    "currency": "CURRENCY_UNSPECIFIED",  # Currency in which to receive the data
+    "currency": "usd",  # Currency in which to receive the data
     "range": {
         "from": start_date,  # Start date in ISO 8601 format
         "to": end_date  # End date in ISO 8601 format
@@ -42,27 +48,25 @@ data = {
     "resolution": "RESOLUTION_ONE_DAY"  #
 }
 
-
-# Make the POST request
+print("Making the request")
 response = requests.post(url, headers=headers, data=json.dumps(data))
+print(f"Response status code: {response.status_code}")
+if response.status_code != 200:
+    print(f"Error: {response.text}")
+    exit()
 
 # pretty print the response's json
 # print(json.dumps(response.json(), indent=2))
+# exit()
 
 # convert json to pandas dataframe
-
-
-
-# data = pd.read_json(response.json())
-# data = response.json()
-
-# Normalize the data to unpack the nested 'items'
 df = pd.json_normalize(response.json()['items'])
 
 # Convert 'timestamp' to datetime
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
 # print(df)
+# exit()  
 
 import matplotlib.pyplot as plt
 
@@ -78,30 +82,30 @@ if not os.path.exists(output_dir):
 
 plt.figure(figsize=(10, 5))  # Set the figure size (optional)
 plt.plot(df['timestamp'], df['netShareValue'], marker='o')  # Line plot with markers
-plt.title('Net Share Value Over Time')  # Title of the plot
-plt.xlabel('Timestamp')  # X-axis label
-plt.ylabel('Net Share Value')  # Y-axis label
+# plt.title('Net Share Value Over Time')  # Title of the plot
+# plt.xlabel('Timestamp')  # X-axis label
+# plt.ylabel('Net Share Value')  # Y-axis label
 plt.grid(True)  # Turn on the grid
 plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
 plt.tight_layout()  # Automatically adjust subplot parameters to give specified padding
 # plt.show()
+# exit()
 output_path = os.path.join(output_dir, 'performance_plot.png')
 plt.savefig(output_path)
 
 # add plot for grossAssetValue
 plt.figure(figsize=(10, 5))  # Set the figure size (optional)
 plt.plot(df['timestamp'], df['grossAssetValue'], marker='o')  # Line plot with markers
-plt.title('Gross Asset Value Over Time')  # Title of the plot
-plt.xlabel('Timestamp')  # X-axis label
-plt.ylabel('Gross Asset Value')  # Y-axis label
+# plt.title('Gross Asset Value Over Time')  # Title of the plot
+# plt.xlabel('Timestamp')  # X-axis label
+# plt.ylabel('Gross Asset Value')  # Y-axis label
 plt.grid(True)  # Turn on the grid
 plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
 plt.tight_layout()  # Automatically adjust subplot parameters to give specified padding
 # plt.show()
-
+# exit()
 output_path = os.path.join(output_dir, 'gross_asset_value_plot.png')
 plt.savefig(output_path)
 
 
-# plt.savefig('./report/gross_asset_value_plot.png')
 

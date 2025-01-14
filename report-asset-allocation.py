@@ -27,18 +27,20 @@ headers = {
 # Request data to be sent in JSON format
 address = os.getenv('ENZYME_VAULT_ADDRESS')
 data = {
-  "deployment": "DEPLOYMENT_UNSPECIFIED",
+  "deployment": "ethereum",
   "address": address,
-  "currency": "CURRENCY_UNSPECIFIED"
+  "currency": "usd"
 }
 
-# Make the POST request
+print("Making the request")
 response = requests.post(url, headers=headers, data=json.dumps(data))
+print(f"Response status code: {response.status_code}")
+if response.status_code != 200:
+    print(f"Error: {response.text}")
+    exit()
 
 # convert json to pandas dataframe
 assets = pd.DataFrame(response.json()["assets"])
-
-
 
 with open('coin_data.json', 'r') as f:
     coin_data = json.load(f)
@@ -142,7 +144,7 @@ def report_inclass_allocations(index_csv, assets, class_name, total):
     print(f'\nExporting to LaTEX')
     pandas_to_latex(inclass_assets, f'report/inclass-{classname}.tex',caption=f'Распределение активов в классе {class_name}', label=f'inclass-allocation-{classname}')
 
-index_date='2024-09-29'
+index_date='2024-12-31'
 print(f'\nusing index data for {index_date}')
 report_inclass_allocations(f'index/{index_date}/Constituents - CoinDesk Large Cap Select Index.csv', assets, 'Native Coins', assets_by_class["value"]["Native Coins"])
 report_inclass_allocations(f'index/{index_date}/Constituents - CoinDesk Stablecoin Index.csv', assets, 'Stable Coins', assets_by_class["value"]["Stable Coins"])

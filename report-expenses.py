@@ -124,7 +124,7 @@ for activity in data['vaultActivities']:
         transaction_hash = get_part_before_slash(activity['feeSharesReceivedEvent']['id'])
         d, f = mgmt_fee(transaction_hash)
         shares = float(activity["feeSharesReceivedEvent"]["shares"])
-        print(f'Date {d} Fee (USD): {f} Shares: {shares}')
+        print(f'Date {d} Fee (USD): {f} Shares: {shares} Tx Hash: {transaction_hash}')
         fee_mgmt["Date"].append(d)
         fee_mgmt["Fee"].append(shares)
     else:
