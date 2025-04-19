@@ -5,6 +5,7 @@ import requests
 import json
 from dotenv import load_dotenv
 import os
+from datetime import timedelta, date
 
 # use first argument as filename, if not provided, use default
 filename = sys.argv[1] if len(sys.argv) > 1 else 'vault-activity.json'
@@ -27,7 +28,11 @@ headers = {
 address = os.getenv('ENZYME_VAULT_ADDRESS')
 start_date = "2024-01-01T00:00:00Z"
 print(f"start date {start_date}")
-end_date = "2024-12-01T00:00:00Z"
+
+
+yesterday_date = date.today() - timedelta(days=1)
+end_date = f"{yesterday_date.isoformat()}T00:00:00Z"
+
 print(f"end date {end_date}")
 
 data = {

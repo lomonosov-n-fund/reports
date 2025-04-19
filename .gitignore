@@ -1,5 +1,5 @@
 # project specific
-env/
+venv/
 prices.db
 trades.db
 vault-activity.json
