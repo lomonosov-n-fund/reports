@@ -1,6 +1,4 @@
-# AI-Generated Reports Documentation
-
-This document provides an overview of the AI-enhanced reporting scripts in this project.
+# Reports Documentation
 
 ## Scripts Overview
 
@@ -11,19 +9,33 @@ Fetches historical vault activity data from the Enzyme API and stores it for use
 **Features:**
 - Retrieves vault activities from fund inception to current date
 - Stores data in JSON format for other scripts to use
-- Uses configurable date ranges
+- Output filename and directory are configurable via CLI options
 
 **Usage:**
 ```bash
-# Basic usage (outputs to vault-activity.json)
+# Basic usage (outputs to vault-activity.json in current directory)
 python query-vault-activity.py
 
-# Specify custom output file
-python query-vault-activity.py custom_output.json
+# Save to a custom output directory (e.g., ./tmp)
+python query-vault-activity.py --output-dir ./tmp
+
+# Specify a custom output filename
+python query-vault-activity.py --filename my-activity.json
+
+# Specify both custom filename and directory
+python query-vault-activity.py --filename my-activity.json --output-dir ./tmp
+
+# Enable verbose output
+python query-vault-activity.py --output-dir ./tmp --verbose
 ```
 
+**CLI Options:**
+- `--filename`: Output filename for vault activity data (default: vault-activity.json)
+- `--output-dir`: Directory to save the output file (default: current directory)
+- `--verbose`: Enable verbose output
+
 **Output Files:**
-- `vault-activity.json`: Raw vault activity data used by other scripts
+- The output file will be saved as `<output-dir>/<filename>`, e.g., `./tmp/vault-activity.json`
 
 ### 2. Depositors Report (`depositors.py`)
 
@@ -37,7 +49,11 @@ Analyzes depositor activity and share distribution in the fund.
 
 **Usage:**
 ```bash
+# test report for the last quarter, the output goes to ./tmp
 python depositors.py --verbose --latex
+
+# silent production run with the output to ./report/depositors_2025_Q2.tex
+python depositors.py --latex --quarter 2 --year 2025 --output-dir ./report
 ```
 
 **Output Files:**
@@ -55,11 +71,11 @@ Generates comprehensive performance analysis of the fund.
 
 **Usage:**
 ```bash
-# Generate LaTeX tables and plots
-python performance.py --verbose --latex
-
-# Interactive mode with plots
+# Interactive test mode with plots
 python performance.py --verbose --operator
+
+# Silent production run Generate LaTeX tables and plots
+python performance.py --latex --quarter 2 --year 2025 --output-dir ./report
 ```
 
 **Output Files:**
@@ -82,6 +98,7 @@ Analyzes fund expenses including transaction fees and management fees.
 
 **Usage:**
 ```bash
+# test report for the last quarter, the output goes to ./tmp
 python expenses.py --verbose --latex
 ```
 
@@ -95,15 +112,32 @@ Analyzes current portfolio composition and compares with target allocations.
 
 **Features:**
 - Fetches current portfolio from Enzyme API
-- Calculates allocation across asset classes
-- Compares with target allocations
+- Calculates allocation across asset classes using historical prices
+- Compares with target allocations from index data
 - Generates in-class allocation analysis
-- Uses Russian headers in LaTeX output
+- Supports configurable report and index dates
 
 **Usage:**
 ```bash
+# Basic usage with defaults (report-date: 2025-07-08, index-date: 2025-07-07)
 python asset-allocation.py --verbose --latex
+
+# Specify custom report date for asset values
+python asset-allocation.py --verbose --report-date 2025-07-08 --latex
+
+# Specify both report and index dates
+python asset-allocation.py --verbose --report-date 2025-07-08 --index-date 2025-07-07 --latex
+
+# Use different index date for comparison
+python asset-allocation.py --verbose --index-date 2025-04-03 --latex
+
+# Production run with custom dates
+python asset-allocation.py --latex --quarter 2 --year 2025 --output-dir ./report --report-date 2025-06-30 --index-date 2025-06-29
 ```
+
+**CLI Options:**
+- `--report-date`: Date for computing asset values using historical prices (YYYY-MM-DD format, default: 2025-07-08)
+- `--index-date`: Date for index comparison data (YYYY-MM-DD format, default: 2025-07-07)
 
 **Output Files:**
 - `assets-by-class_{year}_Q{quarter}.tex`: Overall asset allocation

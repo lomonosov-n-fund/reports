@@ -4,6 +4,7 @@
 import click
 from cli.params import common_options
 from utils.report_dates import get_last_complete_quarter
+from utils.historical_data import HistoricalDataManager
 import requests
 import json
 from dotenv import load_dotenv
@@ -18,14 +19,14 @@ from utils.latex import pandas_to_latex
 # Column names for LaTeX tables
 ASSET_CLASS_COLUMNS = {
     'Asset Class': 'Класс актива',
-    'value': 'Стоимость',
+    'value': 'Стоимость, USD',
     'Percentage': 'Процент',
     'Reference': 'Целевой процент'
 }
 
 INCLASS_COLUMNS = {
     'Asset Name': 'Актив',
-    'value': 'Стоимость',
+    'value': 'Стоимость, USD',
     'Percentage': 'Процент',
     'Reference': 'Целевой процент'
 }
@@ -35,6 +36,8 @@ pd.set_option('display.float_format', '{:.2f}'.format)
 # function to replace blanks with '-'
 def replace_blanks(s):
     return s.replace(' ', '-')
+
+# HistoricalDataManager will be used instead of the old function
 
 def report_inclass_allocations(index_csv, assets, class_name, total, output_dir, dry_run, verbose, year, quarter):
     if not os.path.exists(index_csv):
@@ -62,7 +65,8 @@ def report_inclass_allocations(index_csv, assets, class_name, total, output_dir,
         print(inclass_assets.to_string(index=False))
     classname = replace_blanks(class_name)
     if verbose:
-        print(f'\nExporting to LaTEX')
+        output_file = Path(output_dir) / f'inclass-{classname}_{year}_Q{quarter}.tex'
+        print(f'\nExporting to LaTeX: {output_file}')
     if not dry_run:
         ensure_writable_dir(output_dir, dry_run)
         # Rename columns for LaTeX output
@@ -73,11 +77,14 @@ def report_inclass_allocations(index_csv, assets, class_name, total, output_dir,
 
 @click.command()
 @common_options
-def asset_allocation(dry_run, quarter, year, output_dir, verbose, operator, latex):
+@click.option("--report-date", default="2025-07-08", help="Date for which to compute asset values (YYYY-MM-DD)")
+@click.option("--index-date", default="2025-07-07", help="Date for index data (YYYY-MM-DD)")
+def asset_allocation(dry_run, quarter, year, output_dir, verbose, operator, latex, report_date, index_date):
     # Resolve quarter/year
     q, y = (quarter, year) if quarter and year else get_last_complete_quarter()
     if verbose:
         click.echo(f"Reporting for Q{q} {y}")
+        click.echo(f"Using report date: {report_date}")
 
     load_dotenv()
 
@@ -108,12 +115,47 @@ def asset_allocation(dry_run, quarter, year, output_dir, verbose, operator, late
     if response.status_code != 200:
         print(f"Error: {response.text}")
         exit()
+    if verbose:
+        print("\nAPI Response:")
+        print(json.dumps(response.json(), indent=2))
 
     # convert json to pandas dataframe
     assets = pd.DataFrame(response.json()["assets"])
 
     with open('coin_data.json', 'r') as f:
         coin_data = json.load(f)
+
+    # Compute asset values using historical prices for the report date
+    if verbose:
+        click.echo(f"Computing asset values for report date: {report_date}")
+    
+    # Initialize the historical data manager
+    hist_data = HistoricalDataManager()
+    
+    for idx, row in assets.iterrows():
+        try:
+            # Get the asset symbol from coin_data
+            asset_address = row['address']
+            if asset_address in coin_data:
+                asset_name = coin_data[asset_address]["Asset Name"]
+                balance = row['balance']
+                
+                # Get historical price for this asset using the manager
+                price = hist_data.get_price(asset_name, report_date)
+                
+                # Compute value using historical price
+                computed_value = balance * price
+                assets.at[idx, 'value'] = computed_value
+                
+                if verbose:
+                    click.echo(f"  {asset_name}: balance={balance:.6f}, price=${price:.2f}, value=${computed_value:.2f}")
+            else:
+                if verbose:
+                    click.echo(f"  Warning: No coin data found for address {asset_address}")
+        except Exception as e:
+            if verbose:
+                click.echo(f"  Error computing value for asset {asset_address}: {e}")
+            # Keep the original value if there's an error
 
     # Coin Name - specific coin name 
     # Asset Name - few coins can contribute to the same asset (e.g. WBTC and renBTC both contribute to BTC)
@@ -157,11 +199,13 @@ def asset_allocation(dry_run, quarter, year, output_dir, verbose, operator, late
     if not dry_run:
         ensure_writable_dir(output_dir, dry_run)
         if latex:
-            pandas_to_latex(c_latex, Path(output_dir) / f'assets-by-class_{y}_Q{q}.tex',
+            output_file = Path(output_dir) / f'assets-by-class_{y}_Q{q}.tex'
+            if verbose:
+                print(f'\nExporting to LaTeX: {output_file}')
+            pandas_to_latex(c_latex, output_file,
                           caption='Распределение активов по классам',
                           label='assets-by-class')
 
-    index_date='2025-04-03'
     if verbose:
         print(f'\nusing index data for {index_date}')
     

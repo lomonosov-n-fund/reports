@@ -66,8 +66,9 @@ def depositors(dry_run, quarter, year, output_dir, verbose, operator, latex):
     start_date = "2024-01-01T00:00:00Z"
     # end_date = "2025-03-31T23:59:59Z"
     quarter_start_day, quarter_end_day = get_quarter_dates(y, q)
-    print(f"Quarter starts at: {quarter_start_day}")
-    print(f"Quarter ends at: {quarter_end_day}")
+    if verbose:
+        click.echo(f"Quarter starts at: {quarter_start_day}")
+        click.echo(f"Quarter ends at: {quarter_end_day}")
     end_date = quarter_end_day
     filtered_depositors = filter_depositors_by_date_range(dict['depositors'], start_date, end_date)
 
@@ -82,12 +83,12 @@ def depositors(dry_run, quarter, year, output_dir, verbose, operator, latex):
     })
 
     if verbose:
-        print(summary_df)
+        click.echo(summary_df)
 
     from utils.latex import pandas_to_latex
     filepath = Path(output_dir) / f"depositors_{y}_Q{q}.tex"
     if verbose:
-        print( filepath )
+        click.echo( filepath )
     if not dry_run:
         ensure_writable_dir(output_dir, dry_run)
         pandas_to_latex(summary_df, filepath, caption = 'Основная информация о фонде', label = 'depositors')

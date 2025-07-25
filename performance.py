@@ -16,9 +16,6 @@ from datetime import datetime
 
 pd.set_option('display.float_format', '{:.2f}'.format)
 
-# Fund inception date
-FUND_INCEPTION_DATE = "2024-01-01T00:00:00Z"
-
 def calculate_performance(df, start_date=None):
     """Calculate performance metrics for a given date range"""
     if start_date:
@@ -47,6 +44,9 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
         click.echo(f"Reporting for Q{q} {y}")
 
     load_dotenv()
+
+    # Fund inception date - can be overridden via FUND_INCEPTION_DATE environment variable
+    FUND_INCEPTION_DATE = os.getenv('FUND_INCEPTION_DATE', "2024-01-01T00:00:00Z")
 
     # URL for the request
     url = "https://api.enzyme.finance/enzyme.enzyme.v1.EnzymeService/GetVaultTimeSeries" 
@@ -134,14 +134,15 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
     # Plot quarter-specific net share value
     plt.figure(figsize=(10, 5))
     plt.plot(quarter_df['timestamp'], quarter_df['netShareValue'], marker='o', color='blue')
-    plt.title(f'Quarter {q} {y} Net Share Value')
+    if operator:
+        plt.title(f'Quarter {q} {y} Net Share Value')
     plt.grid(True)
     plt.xticks(rotation=45)
     plt.tight_layout()
     
     if operator:
         plt.show()
-    elif not dry_run:
+    elif latex and not dry_run:
         output_path = Path(output_dir) / f'performance_quarter_{y}_Q{q}.png'
         plt.savefig(output_path)
         if verbose:
@@ -150,14 +151,15 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
     # Plot quarter-specific gross asset value
     plt.figure(figsize=(10, 5))
     plt.plot(quarter_df['timestamp'], quarter_df['grossAssetValue'], marker='o', color='green')
-    plt.title(f'Quarter {q} {y} Gross Asset Value')
+    if operator:
+        plt.title(f'Quarter {q} {y} Gross Asset Value')
     plt.grid(True)
     plt.xticks(rotation=45)
     plt.tight_layout()
     
     if operator:
         plt.show()
-    elif not dry_run:
+    elif latex and not dry_run:
         output_path = Path(output_dir) / f'gross_asset_value_quarter_{y}_Q{q}.png'
         plt.savefig(output_path)
         if verbose:
@@ -166,14 +168,15 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
     # Plot since inception net share value
     plt.figure(figsize=(10, 5))
     plt.plot(df['timestamp'], df['netShareValue'], marker='o', color='blue')
-    plt.title('Net Share Value Since Inception')
+    if operator:
+        plt.title('Net Share Value Since Inception')
     plt.grid(True)
     plt.xticks(rotation=45)
     plt.tight_layout()
     
     if operator:
         plt.show()
-    elif not dry_run:
+    elif latex and not dry_run:
         output_path = Path(output_dir) / f'performance_since_inception_{y}_Q{q}.png'
         plt.savefig(output_path)
         if verbose:
@@ -182,14 +185,15 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
     # Plot since inception gross asset value
     plt.figure(figsize=(10, 5))
     plt.plot(df['timestamp'], df['grossAssetValue'], marker='o', color='green')
-    plt.title('Gross Asset Value Since Inception')
+    if operator:
+        plt.title('Gross Asset Value Since Inception')
     plt.grid(True)
     plt.xticks(rotation=45)
     plt.tight_layout()
     
     if operator:
         plt.show()
-    elif not dry_run:
+    elif latex and not dry_run:
         output_path = Path(output_dir) / f'gross_asset_value_since_inception_{y}_Q{q}.png'
         plt.savefig(output_path)
         if verbose:

@@ -4,6 +4,7 @@ prices.db
 trades.db
 vault-activity.json
 report/
+tmp/
 test
 .DS_Store
 
