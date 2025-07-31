@@ -1,0 +1,12 @@
+{
+    "native_cryptocurrencies": {
+        "BTC": 2.15E+3,
+        "ETH": 3.06E+2,
+        "SOL": 8.15E+1
+    },
+    "stablecoins": {
+        "USDT": 1.59E+2,
+        "USDC": 6.21E+1,
+        "DAI": 3.61E+0
+    }
+} 
