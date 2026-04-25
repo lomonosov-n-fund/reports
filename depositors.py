@@ -24,11 +24,12 @@ def filter_depositors_by_date_range(data, start_date, end_date):
 
 
 @click.command()
+@click.option("--report-date", type=str, help="ISO date to override quarter (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)")
 @common_options
-def depositors(dry_run, quarter, year, output_dir, verbose, operator, latex):
+def depositors(dry_run, quarter, year, output_dir, verbose, operator, latex, report_date):
     # Resolve quarter/year
     q, y = (quarter, year) if quarter and year else get_last_complete_quarter()
-    if verbose:
+    if verbose and not report_date:
         click.echo(f"Reporting for Q{q} {y}")
 
     load_dotenv()
@@ -62,14 +63,23 @@ def depositors(dry_run, quarter, year, output_dir, verbose, operator, latex):
     dict = response.json()
 
     
-    # all depositors as of the last day of the previous quarter
+    # all depositors as of the target report date
     start_date = "2024-01-01T00:00:00Z"
-    # end_date = "2025-03-31T23:59:59Z"
-    quarter_start_day, quarter_end_day = get_quarter_dates(y, q)
-    if verbose:
-        click.echo(f"Quarter starts at: {quarter_start_day}")
-        click.echo(f"Quarter ends at: {quarter_end_day}")
-    end_date = quarter_end_day
+    if report_date:
+        # Normalize provided report date to ISO end-of-day when only YYYY-MM-DD is given
+        report_date_str = report_date
+        if "T" in report_date_str:
+            end_date = report_date_str if report_date_str.endswith("Z") else report_date_str + "Z"
+        else:
+            end_date = f"{report_date_str}T23:59:59Z"
+        if verbose:
+            click.echo(f"Overriding quarter with report date: {end_date}")
+    else:
+        quarter_start_day, quarter_end_day = get_quarter_dates(y, q)
+        if verbose:
+            click.echo(f"Quarter starts at: {quarter_start_day}")
+            click.echo(f"Quarter ends at: {quarter_end_day}")
+        end_date = quarter_end_day
     filtered_depositors = filter_depositors_by_date_range(dict['depositors'], start_date, end_date)
 
 
@@ -86,7 +96,12 @@ def depositors(dry_run, quarter, year, output_dir, verbose, operator, latex):
         click.echo(summary_df)
 
     from utils.latex import pandas_to_latex
-    filepath = Path(output_dir) / f"depositors_{y}_Q{q}.tex"
+    if report_date:
+        # Use date-only portion for filename
+        date_only = report_date.split("T")[0]
+        filepath = Path(output_dir) / f"depositors_{date_only}.tex"
+    else:
+        filepath = Path(output_dir) / f"depositors_{y}_Q{q}.tex"
     if verbose:
         click.echo( filepath )
     if not dry_run:

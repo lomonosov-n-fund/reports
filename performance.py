@@ -36,11 +36,12 @@ def calculate_performance(df, start_date=None):
     }
 
 @click.command()
+@click.option("--report-date", type=str, help="ISO date to override quarter end (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)")
 @common_options
-def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
+def performance(dry_run, quarter, year, output_dir, verbose, operator, latex, report_date):
     # Resolve quarter/year
     q, y = (quarter, year) if quarter and year else get_last_complete_quarter()
-    if verbose:
+    if verbose and not report_date:
         click.echo(f"Reporting for Q{q} {y}")
 
     load_dotenv()
@@ -62,11 +63,21 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
     # Data to be sent in JSON format
     address = os.getenv('ENZYME_VAULT_ADDRESS')
 
-    # Get quarter dates
-    quarter_start_day, quarter_end_day = get_quarter_dates(y, q)
-    if verbose:
-        click.echo(f"Quarter starts at: {quarter_start_day}")
-        click.echo(f"Quarter ends at: {quarter_end_day}")
+    # Get quarter dates or override end date
+    quarter_start_day, computed_quarter_end = get_quarter_dates(y, q)
+    if report_date:
+        # Normalize provided report date to ISO end-of-day when only YYYY-MM-DD is given
+        if "T" in report_date:
+            quarter_end_day = report_date if report_date.endswith("Z") else report_date + "Z"
+        else:
+            quarter_end_day = f"{report_date}T23:59:59Z"
+        if verbose:
+            click.echo(f"Overriding quarter end with report date: {quarter_end_day}")
+    else:
+        quarter_end_day = computed_quarter_end
+        if verbose:
+            click.echo(f"Quarter starts at: {quarter_start_day}")
+            click.echo(f"Quarter ends at: {quarter_end_day}")
 
     data = {
         "deployment": "ethereum", 
@@ -143,7 +154,11 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
     if operator:
         plt.show()
     elif latex and not dry_run:
-        output_path = Path(output_dir) / f'performance_quarter_{y}_Q{q}.png'
+        if report_date:
+            date_only = report_date.split("T")[0]
+            output_path = Path(output_dir) / f'performance_quarter_{date_only}.png'
+        else:
+            output_path = Path(output_dir) / f'performance_quarter_{y}_Q{q}.png'
         plt.savefig(output_path)
         if verbose:
             click.echo(f"Saved quarter net share value plot to {output_path}")
@@ -160,7 +175,11 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
     if operator:
         plt.show()
     elif latex and not dry_run:
-        output_path = Path(output_dir) / f'gross_asset_value_quarter_{y}_Q{q}.png'
+        if report_date:
+            date_only = report_date.split("T")[0]
+            output_path = Path(output_dir) / f'gross_asset_value_quarter_{date_only}.png'
+        else:
+            output_path = Path(output_dir) / f'gross_asset_value_quarter_{y}_Q{q}.png'
         plt.savefig(output_path)
         if verbose:
             click.echo(f"Saved quarter gross asset value plot to {output_path}")
@@ -177,7 +196,11 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
     if operator:
         plt.show()
     elif latex and not dry_run:
-        output_path = Path(output_dir) / f'performance_since_inception_{y}_Q{q}.png'
+        if report_date:
+            date_only = report_date.split("T")[0]
+            output_path = Path(output_dir) / f'performance_since_inception_{date_only}.png'
+        else:
+            output_path = Path(output_dir) / f'performance_since_inception_{y}_Q{q}.png'
         plt.savefig(output_path)
         if verbose:
             click.echo(f"Saved since inception net share value plot to {output_path}")
@@ -194,7 +217,11 @@ def performance(dry_run, quarter, year, output_dir, verbose, operator, latex):
     if operator:
         plt.show()
     elif latex and not dry_run:
-        output_path = Path(output_dir) / f'gross_asset_value_since_inception_{y}_Q{q}.png'
+        if report_date:
+            date_only = report_date.split("T")[0]
+            output_path = Path(output_dir) / f'gross_asset_value_since_inception_{date_only}.png'
+        else:
+            output_path = Path(output_dir) / f'gross_asset_value_since_inception_{y}_Q{q}.png'
         plt.savefig(output_path)
         if verbose:
             click.echo(f"Saved since inception gross asset value plot to {output_path}")

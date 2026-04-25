@@ -45,7 +45,7 @@ Analyzes depositor activity and share distribution in the fund.
 - Calculates total number of depositors and shares
 - Filters depositors by date range
 - Generates LaTeX tables with Russian headers
-- Supports quarter-specific reporting
+- Supports quarter-specific reporting or a specific report date override
 
 **Usage:**
 ```bash
@@ -54,10 +54,17 @@ python depositors.py --verbose --latex
 
 # silent production run with the output to ./report/depositors_2025_Q2.tex
 python depositors.py --latex --quarter 2 --year 2025 --output-dir ./report
+
+# override quarter-based reporting with a specific date (normalized to end-of-day)
+python depositors.py --latex --report-date 2025-10-30 --output-dir ./report
+
+# or with a full ISO timestamp
+python depositors.py --latex --report-date 2025-10-30T18:00:00Z --output-dir ./report
 ```
 
 **Output Files:**
-- `depositors_{year}_Q{quarter}.tex`: Depositor statistics with share counts
+- `depositors_{year}_Q{quarter}.tex`: Depositor statistics with share counts (quarter-based)
+- `depositors_{YYYY-MM-DD}.tex`: When `--report-date` is used
 
 ### 3. Performance Report (`performance.py`)
 
@@ -143,6 +150,57 @@ python asset-allocation.py --latex --quarter 2 --year 2025 --output-dir ./report
 - `assets-by-class_{year}_Q{quarter}.tex`: Overall asset allocation
 - `inclass-Native-Coins_{year}_Q{quarter}.tex`: Native coins allocation
 - `inclass-Stable-Coins_{year}_Q{quarter}.tex`: Stablecoins allocation
+
+
+### 6. Visualize Asset Allocation (`portfolio_visualization.py`)
+
+Generates visual representations of portfolio allocation using pie charts.
+TODO: get the data from chain, not from `asset_allocation.json`
+
+**Features:**
+- Creates hierarchical donut charts with nested visualization
+- Outer ring shows individual cryptocurrency weights within each asset class
+- Inner circle displays the 70/30 split between native cryptocurrencies and stablecoins
+- Uses market capitalization-based weighting within each asset class
+- Supports multiple output formats (PNG, SVG, PDF) with high-resolution output
+- Configurable output directory and display options
+- Uses predefined color schemes for visual consistency
+
+**Usage:**
+```bash
+# Basic usage with default settings
+python portfolio_visualization.py
+
+# Generate high-resolution PNG chart
+python portfolio_visualization.py --output-dir ./charts --format png --verbose
+
+# Create SVG format for web use
+python portfolio_visualization.py --output-dir ./charts --format svg
+
+# Generate PDF for publication
+python portfolio_visualization.py --output-dir ./report --format pdf
+
+# Display chart in browser window
+python portfolio_visualization.py --show
+
+# Production run for Q2 2025
+python portfolio_visualization.py --output-dir ./report --filename "portfolio_visualization_2025_Q2" --format png 
+
+# Production run for specific quarter and year
+python portfolio_visualization.py --output-dir ./report/Q{quarter}_{year} --format png --verbose
+
+# Custom filename for specific report
+python portfolio_visualization.py --filename "Q2_2025_portfolio" --output-dir ./report --format pdf
+
+**CLI Options:**
+- `--output-dir`: Output directory for charts (default: "./tmp")
+- `--format`: Output format - png, svg, or pdf (default: "png")
+- `--filename`: Output filename without extension (default: "portfolio_allocation")
+- `--show`: Display charts in browser window
+- `--verbose`: Show detailed output during generation
+
+**Output Files:**
+- `{filename}.{format}`: Hierarchical donut chart visualization (customizable filename)
 
 ## Recommended Execution Order
 

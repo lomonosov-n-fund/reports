@@ -166,9 +166,10 @@ def create_hierarchical_donut_chart():
 @click.option('--format', 'output_format', default='png', 
               type=click.Choice(['png', 'svg', 'pdf']), 
               help='Output format for charts')
+@click.option('--filename', default='portfolio_allocation', help='Output filename (without extension)')
 @click.option('--show', is_flag=True, help='Display charts in browser')
 @click.option('--verbose', is_flag=True, help='Verbose output')
-def portfolio_visualization(output_dir, output_format, show, verbose):
+def portfolio_visualization(output_dir, output_format, filename, show, verbose):
     """Generate portfolio allocation visualization chart."""
     output_path = Path(output_dir)
     output_path.mkdir(exist_ok=True)
@@ -177,14 +178,15 @@ def portfolio_visualization(output_dir, output_format, show, verbose):
         click.echo(f"Creating portfolio visualization chart...")
         click.echo(f"Output directory: {output_path}")
         click.echo(f"Output format: {output_format}")
+        click.echo(f"Output filename: {filename}")
     
     # Generate and save chart
     fig = create_hierarchical_donut_chart()
-    filename = output_path / f"portfolio_allocation.{output_format}"
-    fig.savefig(str(filename), dpi=300, bbox_inches='tight', facecolor='white')
+    filepath = output_path / f"{filename}.{output_format}"
+    fig.savefig(str(filepath), dpi=300, bbox_inches='tight', facecolor='white')
     
     if verbose:
-        click.echo(f"Saved portfolio allocation chart to: {filename}")
+        click.echo(f"Saved portfolio allocation chart to: {filepath}")
     
     # Display chart if requested
     if show:
