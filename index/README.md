@@ -21,7 +21,16 @@ https://www.coingecko.com/en/coins/dai/historical_data
 
 
 
-Run `market_cap_weights.py` from project root to compute weights:
+- Run `market_cap_weights.py` from project root to compute weights
+- Add manually the computed weights into CSV files ./index/YYYY-MM-DD
+
+
+For 2026 Q1 report:
+```sh
+python market_cap_weights.py btc eth sol --date 2026-04-09 
+python market_cap_weights.py usdt usdc dai --date 2026-04-09 
+```
+
 
 For 2025 Q4 report:
 ```sh

@@ -116,6 +116,7 @@ python expenses.py --verbose --latex
 ### 5. Asset Allocation Report (`asset-allocation.py`)
 
 Analyzes current portfolio composition and compares with target allocations.
+See [index/README.md](./index/README.md) for instructions on computing target allocations.
 
 **Features:**
 - Fetches current portfolio from Enzyme API
